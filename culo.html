@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anagram Visualizer – Expanded View</title>
+    <!-- Google Fonts for beautiful typography -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Poppins:300,400,600"
+      rel="stylesheet"
+    />
+    <style>
+      /* Global resets */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: linear-gradient(135deg, #74abe2, #5563de);
+        font-family: "Poppins", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Input Form Container */
+      .container {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        padding: 2rem;
+        width: 90%;
+        max-width: 600px;
+        margin: 20px;
+      }
+      /* Fullscreen Visualization Container */
+      .big-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        height: 100vh;
+        padding: 2rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Typography */
+      h1 {
+        font-size: 2.5em;
+        color: #333;
+        margin-bottom: 1rem;
+      }
+      h2 {
+        font-size: 2em;
+        color: #333;
+        margin-bottom: 1rem;
+      }
+      p {
+        font-size: 1.1em;
+        color: #666;
+        margin-bottom: 1rem;
+      }
+      /* Inputs and Buttons */
+      input[type="text"] {
+        width: 90%;
+        padding: 1rem;
+        margin: 0.5rem auto;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1.1em;
+        outline: none;
+      }
+      button {
+        background: #5563de;
+        color: #fff;
+        padding: 0.9rem 1.5rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.1em;
+        margin-top: 1rem;
+        transition: background 0.3s;
+      }
+      button:hover {
+        background: #4453c4;
+      }
+      .error {
+        color: red;
+        margin-top: 1rem;
+        font-size: 1.1em;
+      }
+      /* Visualization Styles */
+      .visualization-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding-top: 80px;
+        padding-bottom: 80px;
+        overflow: hidden;
+      }
+      .letter-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        z-index: 2;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+      .letter {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px;
+        width: 80px;
+        height: 80px;
+        font-size: 2em;
+        font-weight: bold;
+        color: #333;
+        background: #f0f0f0;
+        border: 3px solid #5563de;
+        border-radius: 50%;
+        transition: transform 0.3s;
+      }
+      .letter:hover {
+        transform: scale(1.1);
+      }
+      /* SVG overlay for connections */
+      #svgConnections {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Input Form -->
+    <div class="container" id="formContainer">
+      <h1>Anagram Visualizer</h1>
+      <p>Enter the initial and final phrases:</p>
+      <input type="text" id="initialPhrase" placeholder="Initial Phrase" />
+      <input type="text" id="finalPhrase" placeholder="Final Phrase" />
+      <button id="checkButton">Visualize Anagram</button>
+      <div class="error" id="error"></div>
+    </div>
+
+    <!-- Fullscreen Visualization -->
+    <div
+      class="big-container visualization-container"
+      id="visualizationContainer"
+      style="display: none"
+    >
+      <h2>Anagram Visualization</h2>
+      <div id="topRow" class="letter-row"></div>
+      <svg id="svgConnections"></svg>
+      <div id="bottomRow" class="letter-row"></div>
+      <button id="resetButton">Try Again</button>
+    </div>
+
+    <script>
+      /**
+       * Clean a string by removing all non-letter characters and converting to
+       * lowercase.
+       */
+      function cleanString(str) {
+        return str.replace(/[^a-zA-Z]/g, "").toLowerCase();
+      }
+
+      /**
+       * Check if two phrases are anagrams by cleaning them and comparing the
+       * sorted results.
+       */
+      function isAnagram(str1, str2) {
+        const clean1 = cleanString(str1);
+        const clean2 = cleanString(str2);
+        if (clean1.length === 0 || clean2.length === 0) {
+          return false;
+        }
+        const sorted1 = clean1.split("").sort().join("");
+        const sorted2 = clean2.split("").sort().join("");
+        return sorted1 === sorted2;
+      }
+
+      /**
+       * Build a mapping from each letter in the initial array to its
+       * corresponding position in the final array. Duplicate letters are
+       * mapped by first occurrence.
+       */
+      function createMapping(initialArr, finalArr) {
+        const occurrences = {};
+        finalArr.forEach((letter, idx) => {
+          if (!occurrences[letter]) {
+            occurrences[letter] = [];
+          }
+          occurrences[letter].push(idx);
+        });
+
+        const mapping = [];
+        for (let i = 0; i < initialArr.length; i++) {
+          const letter = initialArr[i];
+          if (occurrences[letter] && occurrences[letter].length > 0) {
+            mapping[i] = occurrences[letter].shift();
+          }
+        }
+        return mapping;
+      }
+
+      /**
+       * Draw animated SVG lines connecting each letter of the top row to its
+       * corresponding letter in the bottom row.
+       */
+      function drawConnections() {
+        const svg = document.getElementById("svgConnections");
+        const container = document.getElementById("visualizationContainer");
+        const containerRect = container.getBoundingClientRect();
+
+        // Adjust the SVG to cover the whole container.
+        svg.setAttribute("width", containerRect.width);
+        svg.setAttribute("height", containerRect.height);
+        svg.innerHTML = "";
+
+        // Loop through each top letter and create a connecting line.
+        const topLetters = document.querySelectorAll("#topRow .letter");
+        topLetters.forEach((letter) => {
+          const targetIdx = letter.getAttribute("data-target");
+          const bottomLetter = document.querySelector(
+            `#bottomRow .letter[data-index="${targetIdx}"]`
+          );
+          if (bottomLetter) {
+            const topRect = letter.getBoundingClientRect();
+            const bottomRect = bottomLetter.getBoundingClientRect();
+            const containerPos = container.getBoundingClientRect();
+
+            const x1 =
+              topRect.left - containerPos.left + topRect.width / 2;
+            const y1 =
+              topRect.top - containerPos.top + topRect.height / 2;
+            const x2 =
+              bottomRect.left - containerPos.left + bottomRect.width / 2;
+            const y2 =
+              bottomRect.top - containerPos.top + bottomRect.height / 2;
+
+            const line = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "line"
+            );
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            line.setAttribute("stroke", "#5563de");
+            line.setAttribute("stroke-width", "3");
+            line.setAttribute("stroke-linecap", "round");
+            line.style.opacity = 0;
+            svg.appendChild(line);
+            setTimeout(() => {
+              line.style.transition = "opacity 0.6s ease-in-out";
+              line.style.opacity = 1;
+            }, 100);
+          }
+        });
+      }
+
+      /**
+       * Build the visualization by creating two rows of letter elements.
+       * Each top letter gets a data attribute for its corresponding bottom index.
+       */
+      function buildVisualization(initialStr, finalStr) {
+        const cleanedInitial = cleanString(initialStr);
+        const cleanedFinal = cleanString(finalStr);
+        const initialArr = cleanedInitial.split("");
+        const finalArr = cleanedFinal.split("");
+        const mapping = createMapping(initialArr, finalArr);
+
+        // Populate the top row.
+        const topRow = document.getElementById("topRow");
+        topRow.innerHTML = "";
+        initialArr.forEach((letter, idx) => {
+          const span = document.createElement("span");
+          span.classList.add("letter");
+          span.textContent = letter.toUpperCase();
+          // Set data attribute to store mapping to the final row.
+          span.setAttribute("data-target", mapping[idx]);
+          topRow.appendChild(span);
+        });
+
+        // Populate the bottom row.
+        const bottomRow = document.getElementById("bottomRow");
+        bottomRow.innerHTML = "";
+        finalArr.forEach((letter, idx) => {
+          const span = document.createElement("span");
+          span.classList.add("letter");
+          span.textContent = letter.toUpperCase();
+          span.setAttribute("data-index", idx);
+          bottomRow.appendChild(span);
+        });
+
+        // Allow the DOM to render before drawing connections.
+        setTimeout(drawConnections, 150);
+      }
+
+      // Event listener for verifying and visualizing the anagram.
+      document.getElementById("checkButton").addEventListener("click", () => {
+        const initialPhrase = document.getElementById("initialPhrase").value;
+        const finalPhrase = document.getElementById("finalPhrase").value;
+        const errorDiv = document.getElementById("error");
+        errorDiv.textContent = "";
+
+        if (initialPhrase.trim() === "" || finalPhrase.trim() === "") {
+          errorDiv.textContent = "Please enter both phrases.";
+          return;
+        }
+
+        if (!isAnagram(initialPhrase, finalPhrase)) {
+          errorDiv.textContent =
+            "The phrases are not anagrams. Please try again.";
+          return;
+        }
+
+        // Hide the form and show the visualization.
+        document.getElementById("formContainer").style.display = "none";
+        document.getElementById("visualizationContainer").style.display =
+          "flex";
+
+        buildVisualization(initialPhrase, finalPhrase);
+      });
+
+      // Reset view to allow a new anagram input.
+      document.getElementById("resetButton").addEventListener("click", () => {
+        document.getElementById("initialPhrase").value = "";
+        document.getElementById("finalPhrase").value = "";
+        document.getElementById("visualizationContainer").style.display =
+          "none";
+        document.getElementById("formContainer").style.display = "block";
+      });
+
+      // Redraw SVG connections on window resize to ensure alignment.
+      window.addEventListener("resize", () => {
+        if (
+          document.getElementById("visualizationContainer").style
+            .display !== "none"
+        ) {
+          drawConnections();
+        }
+      });
+    </script>
+  </body>
+</html>
