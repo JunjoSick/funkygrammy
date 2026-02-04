@@ -3,354 +3,695 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Anagram Visualizer – Expanded View</title>
-    <!-- Google Fonts for beautiful typography -->
+    <title>Anagram Visualizer</title>
     <link
-      href="https://fonts.googleapis.com/css?family=Poppins:300,400,600"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
       rel="stylesheet"
     />
     <style>
-      /* Global resets */
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
+
       body {
-        background: linear-gradient(135deg, #74abe2, #5563de);
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
         font-family: "Poppins", sans-serif;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        padding: 20px;
       }
-      /* Input Form Container */
+
+      /* Input Form */
       .container {
-        background: #fff;
-        border-radius: 10px;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        padding: 2rem;
-        width: 90%;
-        max-width: 600px;
-        margin: 20px;
-      }
-      /* Fullscreen Visualization Container */
-      .big-container {
         background: rgba(255, 255, 255, 0.95);
-        border-radius: 10px;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        text-align: center;
+        padding: 2.5rem;
         width: 100%;
-        height: 100vh;
-        padding: 2rem;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+        max-width: 500px;
       }
-      /* Typography */
+
       h1 {
-        font-size: 2.5em;
-        color: #333;
-        margin-bottom: 1rem;
+        font-size: 2rem;
+        color: #1a1a2e;
+        margin-bottom: 0.5rem;
       }
-      h2 {
-        font-size: 2em;
-        color: #333;
-        margin-bottom: 1rem;
-      }
-      p {
-        font-size: 1.1em;
+
+      .subtitle {
+        font-size: 0.95rem;
         color: #666;
+        margin-bottom: 1.5rem;
+      }
+
+      .input-group {
         margin-bottom: 1rem;
       }
-      /* Inputs and Buttons */
-      input[type="text"] {
-        width: 90%;
-        padding: 1rem;
-        margin: 0.5rem auto;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        font-size: 1.1em;
-        outline: none;
+
+      .input-group label {
+        display: block;
+        text-align: left;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.3rem;
       }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        border-color: #5563de;
+        box-shadow: 0 0 0 3px rgba(85, 99, 222, 0.15);
+      }
+
+      .button-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 1.5rem;
+      }
+
       button {
+        flex: 1;
         background: #5563de;
         color: #fff;
-        padding: 0.9rem 1.5rem;
+        padding: 0.85rem 1.2rem;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px;
         cursor: pointer;
-        font-size: 1.1em;
-        margin-top: 1rem;
-        transition: background 0.3s;
+        font-size: 0.95rem;
+        font-family: inherit;
+        font-weight: 600;
+        transition: background 0.2s, transform 0.1s;
       }
+
       button:hover {
         background: #4453c4;
       }
-      .error {
-        color: red;
-        margin-top: 1rem;
-        font-size: 1.1em;
+
+      button:active {
+        transform: scale(0.98);
       }
-      /* Visualization Styles */
-      .visualization-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        padding-top: 80px;
-        padding-bottom: 80px;
-        overflow: hidden;
-      }
-      .letter-row {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        position: relative;
-        z-index: 2;
-        margin: 20px 0;
-        flex-wrap: wrap;
-      }
-      .letter {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        margin: 10px;
-        width: 80px;
-        height: 80px;
-        font-size: 2em;
-        font-weight: bold;
+
+      button.secondary {
+        background: #e8e8e8;
         color: #333;
-        background: #f0f0f0;
-        border: 3px solid #5563de;
-        border-radius: 50%;
-        transition: transform 0.3s;
       }
-      .letter:hover {
-        transform: scale(1.1);
+
+      button.secondary:hover {
+        background: #d8d8d8;
       }
-      /* SVG overlay for connections */
+
+      .error {
+        color: #e74c3c;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        min-height: 1.4em;
+      }
+
+      /* Visualization */
+      .viz-container {
+        background: rgba(255, 255, 255, 0.97);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 1200px;
+        min-height: 80vh;
+        padding: 2rem;
+        display: none;
+        flex-direction: column;
+      }
+
+      .viz-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .viz-header h2 {
+        font-size: 1.5rem;
+        color: #1a1a2e;
+      }
+
+      .phrase-display {
+        text-align: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .phrase-display .label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #888;
+        margin-bottom: 0.25rem;
+      }
+
+      .phrase-display .phrase {
+        font-size: 1.1rem;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .viz-area {
+        flex: 1;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 400px;
+      }
+
       #svgConnections {
         position: absolute;
         top: 0;
         left: 0;
-        z-index: 1;
+        width: 100%;
+        height: 100%;
         pointer-events: none;
+        z-index: 1;
+      }
+
+      #svgConnections path {
+        fill: none;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        opacity: 0;
+        transition: opacity 0.4s, stroke-width 0.2s;
+      }
+
+      #svgConnections path.visible {
+        opacity: 0.6;
+      }
+
+      #svgConnections path.highlighted {
+        opacity: 1;
+        stroke-width: 4;
+      }
+
+      #svgConnections path.dimmed {
+        opacity: 0.1;
+      }
+
+      .letter-row {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 20px 10px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .letter {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: var(--letter-size, 60px);
+        height: var(--letter-size, 60px);
+        font-size: var(--letter-font, 1.5rem);
+        font-weight: 600;
+        color: #fff;
+        background: #5563de;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+        box-shadow: 0 4px 15px rgba(85, 99, 222, 0.3);
+      }
+
+      .letter:hover {
+        transform: scale(1.15);
+        box-shadow: 0 6px 25px rgba(85, 99, 222, 0.5);
+      }
+
+      .letter.highlighted {
+        transform: scale(1.2);
+        box-shadow: 0 8px 30px rgba(85, 99, 222, 0.6);
+        z-index: 10;
+      }
+
+      .letter.dimmed {
+        filter: grayscale(50%);
+        opacity: 0.4;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .controls button {
+        flex: 0 1 auto;
+        min-width: 120px;
+      }
+
+      /* Responsive */
+      @media (max-width: 600px) {
+        .container {
+          padding: 1.5rem;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .viz-container {
+          padding: 1rem;
+        }
+
+        .viz-header {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .button-group {
+          flex-direction: column;
+        }
       }
     </style>
   </head>
   <body>
     <!-- Input Form -->
     <div class="container" id="formContainer">
-      <h1>Anagram Visualizer</h1>
-      <p>Enter the initial and final phrases:</p>
-      <input type="text" id="initialPhrase" placeholder="Initial Phrase" />
-      <input type="text" id="finalPhrase" placeholder="Final Phrase" />
-      <button id="checkButton">Visualize Anagram</button>
+      <h1>✨ Anagram Visualizer</h1>
+      <p class="subtitle">See how letters rearrange between phrases</p>
+
+      <div class="input-group">
+        <label for="initialPhrase">Initial Phrase</label>
+        <input type="text" id="initialPhrase" placeholder="e.g., Listen" />
+      </div>
+
+      <div class="input-group">
+        <label for="finalPhrase">Final Phrase</label>
+        <input type="text" id="finalPhrase" placeholder="e.g., Silent" />
+      </div>
+
+      <div class="button-group">
+        <button id="checkButton">Visualize</button>
+        <button id="exampleButton" class="secondary">Try Example</button>
+      </div>
+
       <div class="error" id="error"></div>
     </div>
 
-    <!-- Fullscreen Visualization -->
-    <div
-      class="big-container visualization-container"
-      id="visualizationContainer"
-      style="display: none"
-    >
-      <h2>Anagram Visualization</h2>
-      <div id="topRow" class="letter-row"></div>
-      <svg id="svgConnections"></svg>
-      <div id="bottomRow" class="letter-row"></div>
-      <button id="resetButton">Try Again</button>
+    <!-- Visualization -->
+    <div class="viz-container" id="vizContainer">
+      <div class="viz-header">
+        <h2>Anagram Mapping</h2>
+        <button id="resetButton" class="secondary">← Back</button>
+      </div>
+
+      <div class="phrase-display">
+        <div class="label">Original</div>
+        <div class="phrase" id="originalPhrase"></div>
+      </div>
+
+      <div class="viz-area" id="vizArea">
+        <div id="topRow" class="letter-row"></div>
+        <svg id="svgConnections"></svg>
+        <div id="bottomRow" class="letter-row"></div>
+      </div>
+
+      <div class="phrase-display">
+        <div class="label">Anagram</div>
+        <div class="phrase" id="anagramPhrase"></div>
+      </div>
+
+      <div class="controls">
+        <button id="animateButton">▶ Animate</button>
+        <button id="shuffleButton" class="secondary">🎲 New Colors</button>
+      </div>
     </div>
 
     <script>
-      /**
-       * Clean a string by removing all non-letter characters and converting to
-       * lowercase.
-       */
+      // ─── Utilities ───────────────────────────────────────────────────
       function cleanString(str) {
         return str.replace(/[^a-zA-Z]/g, "").toLowerCase();
       }
 
-      /**
-       * Check if two phrases are anagrams by cleaning them and comparing the
-       * sorted results.
-       */
       function isAnagram(str1, str2) {
-        const clean1 = cleanString(str1);
-        const clean2 = cleanString(str2);
-        if (clean1.length === 0 || clean2.length === 0) {
-          return false;
-        }
-        const sorted1 = clean1.split("").sort().join("");
-        const sorted2 = clean2.split("").sort().join("");
-        return sorted1 === sorted2;
+        const c1 = cleanString(str1);
+        const c2 = cleanString(str2);
+        if (c1.length === 0 || c2.length === 0) return false;
+        return c1.split("").sort().join("") === c2.split("").sort().join("");
       }
 
-      /**
-       * Build a mapping from each letter in the initial array to its
-       * corresponding position in the final array. Duplicate letters are
-       * mapped by first occurrence.
-       */
+      function debounce(fn, ms) {
+        let timeout;
+        return (...args) => {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => fn(...args), ms);
+        };
+      }
+
+      // ─── Color Generation ────────────────────────────────────────────
+      function generateColors(count) {
+        const colors = [];
+        for (let i = 0; i < count; i++) {
+          const hue = (i * 360) / count;
+          colors.push(`hsl(${hue}, 70%, 55%)`);
+        }
+        // Shuffle for variety
+        for (let i = colors.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [colors[i], colors[j]] = [colors[j], colors[i]];
+        }
+        return colors;
+      }
+
+      // ─── Mapping with Crossing Minimization ──────────────────────────
       function createMapping(initialArr, finalArr) {
         const occurrences = {};
         finalArr.forEach((letter, idx) => {
-          if (!occurrences[letter]) {
-            occurrences[letter] = [];
-          }
+          if (!occurrences[letter]) occurrences[letter] = [];
           occurrences[letter].push(idx);
         });
 
         const mapping = [];
         for (let i = 0; i < initialArr.length; i++) {
           const letter = initialArr[i];
-          if (occurrences[letter] && occurrences[letter].length > 0) {
-            mapping[i] = occurrences[letter].shift();
+          if (occurrences[letter]?.length > 0) {
+            // Pick closest available position to reduce crossings
+            const available = occurrences[letter];
+            let bestIdx = 0;
+            let bestDist = Math.abs(available[0] - i);
+            for (let j = 1; j < available.length; j++) {
+              const dist = Math.abs(available[j] - i);
+              if (dist < bestDist) {
+                bestDist = dist;
+                bestIdx = j;
+              }
+            }
+            mapping[i] = available.splice(bestIdx, 1)[0];
           }
         }
         return mapping;
       }
 
-      /**
-       * Draw animated SVG lines connecting each letter of the top row to its
-       * corresponding letter in the bottom row.
-       */
-      function drawConnections() {
-        const svg = document.getElementById("svgConnections");
-        const container = document.getElementById("visualizationContainer");
-        const containerRect = container.getBoundingClientRect();
+      // ─── Visualization Builder ───────────────────────────────────────
+      let currentColors = [];
+      let currentMapping = [];
 
-        // Adjust the SVG to cover the whole container.
-        svg.setAttribute("width", containerRect.width);
-        svg.setAttribute("height", containerRect.height);
-        svg.innerHTML = "";
-
-        // Loop through each top letter and create a connecting line.
-        const topLetters = document.querySelectorAll("#topRow .letter");
-        topLetters.forEach((letter) => {
-          const targetIdx = letter.getAttribute("data-target");
-          const bottomLetter = document.querySelector(
-            `#bottomRow .letter[data-index="${targetIdx}"]`
-          );
-          if (bottomLetter) {
-            const topRect = letter.getBoundingClientRect();
-            const bottomRect = bottomLetter.getBoundingClientRect();
-            const containerPos = container.getBoundingClientRect();
-
-            const x1 =
-              topRect.left - containerPos.left + topRect.width / 2;
-            const y1 =
-              topRect.top - containerPos.top + topRect.height / 2;
-            const x2 =
-              bottomRect.left - containerPos.left + bottomRect.width / 2;
-            const y2 =
-              bottomRect.top - containerPos.top + bottomRect.height / 2;
-
-            const line = document.createElementNS(
-              "http://www.w3.org/2000/svg",
-              "line"
-            );
-            line.setAttribute("x1", x1);
-            line.setAttribute("y1", y1);
-            line.setAttribute("x2", x2);
-            line.setAttribute("y2", y2);
-            line.setAttribute("stroke", "#5563de");
-            line.setAttribute("stroke-width", "3");
-            line.setAttribute("stroke-linecap", "round");
-            line.style.opacity = 0;
-            svg.appendChild(line);
-            setTimeout(() => {
-              line.style.transition = "opacity 0.6s ease-in-out";
-              line.style.opacity = 1;
-            }, 100);
-          }
-        });
+      function calculateLetterSize(count) {
+        const containerWidth = Math.min(window.innerWidth - 80, 1120);
+        const maxSize = 70;
+        const minSize = 36;
+        const idealSize = Math.floor((containerWidth - count * 16) / count);
+        return Math.max(minSize, Math.min(maxSize, idealSize));
       }
 
-      /**
-       * Build the visualization by creating two rows of letter elements.
-       * Each top letter gets a data attribute for its corresponding bottom index.
-       */
       function buildVisualization(initialStr, finalStr) {
         const cleanedInitial = cleanString(initialStr);
         const cleanedFinal = cleanString(finalStr);
         const initialArr = cleanedInitial.split("");
         const finalArr = cleanedFinal.split("");
-        const mapping = createMapping(initialArr, finalArr);
 
-        // Populate the top row.
+        currentMapping = createMapping(initialArr, finalArr);
+        currentColors = generateColors(initialArr.length);
+
+        const size = calculateLetterSize(initialArr.length);
+        const fontSize = Math.max(0.9, size / 40);
+
+        document.documentElement.style.setProperty(
+          "--letter-size",
+          `${size}px`
+        );
+        document.documentElement.style.setProperty(
+          "--letter-font",
+          `${fontSize}rem`
+        );
+
+        // Display original phrases
+        document.getElementById("originalPhrase").textContent = initialStr;
+        document.getElementById("anagramPhrase").textContent = finalStr;
+
+        // Build top row
         const topRow = document.getElementById("topRow");
         topRow.innerHTML = "";
         initialArr.forEach((letter, idx) => {
           const span = document.createElement("span");
           span.classList.add("letter");
           span.textContent = letter.toUpperCase();
-          // Set data attribute to store mapping to the final row.
-          span.setAttribute("data-target", mapping[idx]);
+          span.style.background = currentColors[idx];
+          span.dataset.index = idx;
+          span.dataset.target = currentMapping[idx];
+          span.addEventListener("mouseenter", () => highlightPair(idx));
+          span.addEventListener("mouseleave", clearHighlights);
           topRow.appendChild(span);
         });
 
-        // Populate the bottom row.
+        // Build bottom row
         const bottomRow = document.getElementById("bottomRow");
         bottomRow.innerHTML = "";
         finalArr.forEach((letter, idx) => {
           const span = document.createElement("span");
           span.classList.add("letter");
           span.textContent = letter.toUpperCase();
-          span.setAttribute("data-index", idx);
+          // Find which top letter maps to this
+          const sourceIdx = currentMapping.indexOf(idx);
+          span.style.background =
+            sourceIdx !== -1 ? currentColors[sourceIdx] : "#888";
+          span.dataset.index = idx;
+          span.dataset.source = sourceIdx;
+          span.addEventListener("mouseenter", () =>
+            highlightPair(sourceIdx)
+          );
+          span.addEventListener("mouseleave", clearHighlights);
           bottomRow.appendChild(span);
         });
 
-        // Allow the DOM to render before drawing connections.
-        setTimeout(drawConnections, 150);
+        setTimeout(() => {
+          drawConnections();
+          animateConnectionsIn();
+        }, 100);
       }
 
-      // Event listener for verifying and visualizing the anagram.
+      // ─── SVG Curved Connections ──────────────────────────────────────
+      function drawConnections() {
+        const svg = document.getElementById("svgConnections");
+        const vizArea = document.getElementById("vizArea");
+        const rect = vizArea.getBoundingClientRect();
+
+        svg.setAttribute("width", rect.width);
+        svg.setAttribute("height", rect.height);
+        svg.innerHTML = "";
+
+        const topLetters = document.querySelectorAll("#topRow .letter");
+        const areaRect = vizArea.getBoundingClientRect();
+
+        topLetters.forEach((letter, idx) => {
+          const targetIdx = letter.dataset.target;
+          const bottomLetter = document.querySelector(
+            `#bottomRow .letter[data-index="${targetIdx}"]`
+          );
+
+          if (!bottomLetter) return;
+
+          const topRect = letter.getBoundingClientRect();
+          const bottomRect = bottomLetter.getBoundingClientRect();
+
+          const x1 = topRect.left - areaRect.left + topRect.width / 2;
+          const y1 = topRect.top - areaRect.top + topRect.height;
+          const x2 = bottomRect.left - areaRect.left + bottomRect.width / 2;
+          const y2 = bottomRect.top - areaRect.top;
+
+          // Bézier curve control points
+          const midY = (y1 + y2) / 2;
+          const path = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path"
+          );
+          path.setAttribute(
+            "d",
+            `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`
+          );
+          path.setAttribute("stroke", currentColors[idx]);
+          path.dataset.index = idx;
+          svg.appendChild(path);
+        });
+      }
+
+      function animateConnectionsIn() {
+        const paths = document.querySelectorAll("#svgConnections path");
+        paths.forEach((path, i) => {
+          setTimeout(() => {
+            path.classList.add("visible");
+          }, i * 50);
+        });
+      }
+
+      // ─── Highlight Interactions ──────────────────────────────────────
+      function highlightPair(idx) {
+        if (idx === -1) return;
+
+        // Highlight letters
+        document.querySelectorAll(".letter").forEach((el) => {
+          if (
+            el.dataset.index == idx ||
+            el.dataset.source == idx ||
+            el.dataset.target == currentMapping[idx]
+          ) {
+            el.classList.add("highlighted");
+            el.classList.remove("dimmed");
+          } else {
+            el.classList.add("dimmed");
+            el.classList.remove("highlighted");
+          }
+        });
+
+        // Highlight paths
+        document.querySelectorAll("#svgConnections path").forEach((path) => {
+          if (path.dataset.index == idx) {
+            path.classList.add("highlighted");
+            path.classList.remove("dimmed");
+          } else {
+            path.classList.add("dimmed");
+            path.classList.remove("highlighted");
+          }
+        });
+      }
+
+      function clearHighlights() {
+        document.querySelectorAll(".letter").forEach((el) => {
+          el.classList.remove("highlighted", "dimmed");
+        });
+        document.querySelectorAll("#svgConnections path").forEach((path) => {
+          path.classList.remove("highlighted", "dimmed");
+        });
+      }
+
+      // ─── Animation Mode ──────────────────────────────────────────────
+      function animateLetters() {
+        const topLetters = document.querySelectorAll("#topRow .letter");
+        const bottomLetters = document.querySelectorAll("#bottomRow .letter");
+        const vizArea = document.getElementById("vizArea");
+        const areaRect = vizArea.getBoundingClientRect();
+
+        // Hide connections during animation
+        document.getElementById("svgConnections").style.opacity = "0";
+
+        topLetters.forEach((letter, idx) => {
+          const targetIdx = currentMapping[idx];
+          const bottomLetter = bottomLetters[targetIdx];
+          if (!bottomLetter) return;
+
+          const topRect = letter.getBoundingClientRect();
+          const bottomRect = bottomLetter.getBoundingClientRect();
+
+          const deltaX = bottomRect.left - topRect.left;
+          const deltaY = bottomRect.top - topRect.top;
+
+          letter.style.transition = `transform 1s ease-in-out ${idx * 0.05}s`;
+          letter.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        });
+
+        // Reset after animation
+        setTimeout(
+          () => {
+            topLetters.forEach((letter) => {
+              letter.style.transition = "transform 0.3s";
+              letter.style.transform = "";
+            });
+            document.getElementById("svgConnections").style.opacity = "1";
+          },
+          1500 + topLetters.length * 50
+        );
+      }
+
+      // ─── Event Listeners ─────────────────────────────────────────────
+      const examples = [
+        ["Listen", "Silent"],
+        ["Astronomer", "Moon starer"],
+        ["The eyes", "They see"],
+        ["A decimal point", "I'm a dot in place"],
+        ["Eleven plus two", "Twelve plus one"],
+        ["Dormitory", "Dirty room"],
+        ["Slot machines", "Cash lost in me"],
+      ];
+
       document.getElementById("checkButton").addEventListener("click", () => {
-        const initialPhrase = document.getElementById("initialPhrase").value;
-        const finalPhrase = document.getElementById("finalPhrase").value;
+        const initial = document.getElementById("initialPhrase").value;
+        const final = document.getElementById("finalPhrase").value;
         const errorDiv = document.getElementById("error");
         errorDiv.textContent = "";
 
-        if (initialPhrase.trim() === "" || finalPhrase.trim() === "") {
+        if (!initial.trim() || !final.trim()) {
           errorDiv.textContent = "Please enter both phrases.";
           return;
         }
 
-        if (!isAnagram(initialPhrase, finalPhrase)) {
-          errorDiv.textContent =
-            "The phrases are not anagrams. Please try again.";
+        if (!isAnagram(initial, final)) {
+          errorDiv.textContent = "These phrases are not anagrams!";
           return;
         }
 
-        // Hide the form and show the visualization.
         document.getElementById("formContainer").style.display = "none";
-        document.getElementById("visualizationContainer").style.display =
-          "flex";
-
-        buildVisualization(initialPhrase, finalPhrase);
+        document.getElementById("vizContainer").style.display = "flex";
+        buildVisualization(initial, final);
       });
 
-      // Reset view to allow a new anagram input.
+      document.getElementById("exampleButton").addEventListener("click", () => {
+        const [initial, final] =
+          examples[Math.floor(Math.random() * examples.length)];
+        document.getElementById("initialPhrase").value = initial;
+        document.getElementById("finalPhrase").value = final;
+      });
+
       document.getElementById("resetButton").addEventListener("click", () => {
-        document.getElementById("initialPhrase").value = "";
-        document.getElementById("finalPhrase").value = "";
-        document.getElementById("visualizationContainer").style.display =
-          "none";
+        document.getElementById("vizContainer").style.display = "none";
         document.getElementById("formContainer").style.display = "block";
+        document.getElementById("error").textContent = "";
       });
 
-      // Redraw SVG connections on window resize to ensure alignment.
-      window.addEventListener("resize", () => {
-        if (
-          document.getElementById("visualizationContainer").style
-            .display !== "none"
-        ) {
-          drawConnections();
-        }
+      document
+        .getElementById("animateButton")
+        .addEventListener("click", animateLetters);
+
+      document.getElementById("shuffleButton").addEventListener("click", () => {
+        const initial = document.getElementById("originalPhrase").textContent;
+        const final = document.getElementById("anagramPhrase").textContent;
+        buildVisualization(initial, final);
       });
+
+      window.addEventListener(
+        "resize",
+        debounce(() => {
+          if (document.getElementById("vizContainer").style.display !== "none") {
+            const initial =
+              document.getElementById("originalPhrase").textContent;
+            const final = document.getElementById("anagramPhrase").textContent;
+            buildVisualization(initial, final);
+          }
+        }, 200)
+      );
+
+      // Allow Enter key to submit
+      document
+        .getElementById("finalPhrase")
+        .addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            document.getElementById("checkButton").click();
+          }
+        });
     </script>
   </body>
 </html>
